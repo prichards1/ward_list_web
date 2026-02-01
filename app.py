@@ -1,3 +1,4 @@
+import os
 import io
 import csv
 import re
@@ -7,7 +8,8 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from thefuzz import process, fuzz
 
 app = Flask(__name__)
-app.secret_key = 'dev-key-change-this-later'
+# Load from Environment variable, fallback to dev key if missing
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-key-change-this-later')
 
 # --- LOGIC CLASS (Unchanged) ---
 class NameMatcher:
