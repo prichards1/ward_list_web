@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # 1. The Python Application (Gunicorn)
+  app:
+    build: .
+    container_name: ward_list_app
+    restart: unless-stopped
+    expose:
+      - "8000"  # Only exposed internally to the nginx container, not the host
+    environment:
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+    volumes:
+      # Optional: Mount code so you can edit without rebuilding (Dev mode)
+      # Remove this line in true production if you want immutable images
+      - ./:/app
+
+  # 2. The Local Proxy (Nginx)
+  nginx:
+    image: nginx:alpine
+    container_name: ward_list_nginx
+    restart: unless-stopped
+    ports:
+      # Maps HOST_PORT (from .env) to Container Port 80
+      - "${WARD_QUIZ_PORT:-8085}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
