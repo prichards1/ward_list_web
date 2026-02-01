@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ward List Quiz</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
+  </head>
+  <body>
+    <main class="container">
+      <h1>Ward List Quiz</h1>
+      
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <article>{{ message }}</article>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="grid">
+        <div>
+          <h3>Upload Family List</h3>
+          <p>Select your <code>.csv</code> file to begin.</p>
+          <form method=post enctype=multipart/form-data>
+            <input type=file name=file accept=".csv">
+            <button type=submit>Start Quiz</button>
+          </form>
+        </div>
+        <div>
+          <h3>Instructions</h3>
+          <ul>
+            <li>File must be a CSV.</li>
+            <li>Must contain columns: <strong>Last Name</strong>, <strong>First Name</strong>.</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

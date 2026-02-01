@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Playing Quiz</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
+    <style>
+        .score-board { float: right; font-weight: bold; margin-bottom: 20px;}
+        .family-card { padding: 30px; border: 1px solid #ccc; border-radius: 8px; margin-top: 10px; background: white;}
+        .result-box { padding: 15px; border-radius: 6px; margin-bottom: 10px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        textarea { font-size: 1.1rem; }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      
+      <div class="score-board">
+        Score: {{ score }} / {{ total }}
+        &nbsp;|&nbsp; 
+        <a href="{{ url_for('reset') }}" style="font-size: 0.9em;">End Game</a>
+      </div>
+
+      <h1>Who are they?</h1>
+
+      <div class="family-card">
+        <h2 style="margin-bottom: 0.5rem;">The <strong>{{ family['Last Name'] }}</strong> Family</h2>
+        <p style="color: #666; font-style: italic; margin-bottom: 2rem;">
+            This family has {{ family['First Name']|length }} members.
+        </p>
+        
+        <form method="POST" action="{{ url_for('quiz') }}">
+            
+            {% if not results %}
+                <label for="guesses">Enter first names (one per line):</label>
+                <textarea id="guesses" name="guesses" rows="6" placeholder="John&#10;Jane&#10;..." required autofocus></textarea>
+                
+                <button type="submit" name="action" value="submit">Submit Guesses</button>
+            
+            {% else %}
+                
+                {% if results['matched'] %}
+                <div class="result-box success">
+                    <strong>✅ Correct Matches:</strong>
+                    <ul>
+                        {% for item in results['matched'] %}
+                            <li>
+                                <strong>{{ item['real'] }}</strong> 
+                                {% if item['reason'] != 'Exact Match' %}
+                                    <small>(Matched "{{ item['guess'] }}" via {{ item['reason'] }})</small>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if results['missed'] %}
+                <div class="result-box error">
+                    <strong>❌ Missed Names:</strong>
+                    <ul>
+                        {% for name in results['missed'] %}
+                            <li>{{ name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if results['extra'] %}
+                <div class="result-box warning">
+                    <strong>⚠️ Incorrect / Extra:</strong>
+                    <ul>
+                        {% for name in results['extra'] %}
+                            <li>{{ name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if results['is_perfect'] %}
+                    <h3 style="color: green; text-align: center;">🎉 PERFECT! 🎉</h3>
+                {% endif %}
+
+                <button type="submit" name="action" value="next" class="contrast">Next Family &rarr;</button>
+
+            {% endif %}
+        </form>
+      </div>
+
+    </main>
+    
+    {% if not results %}
+    <script>
+        document.getElementById("guesses").focus();
+    </script>
+    {% else %}
+    <script>
+        document.querySelector("button[value='next']").focus();
+    </script>
+    {% endif %}
+  </body>
+</html>
