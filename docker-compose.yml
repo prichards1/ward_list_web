@@ -12,9 +12,7 @@ services:
       # Defaults to a random key if not provided (handled in app.py), 
       # but passes the env var if Portainer sets one.
       - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
-    volumes:
-      - ./:/app
-
+    
   # 2. The Local Proxy (Nginx)
   nginx:
     build:
