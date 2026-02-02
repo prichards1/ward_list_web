@@ -1,4 +1,5 @@
 import os
+import secrets
 import io
 import csv
 import re
@@ -9,7 +10,7 @@ from thefuzz import process, fuzz
 
 app = Flask(__name__)
 # Load from Environment variable, fallback to dev key if missing
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-key-change-this-later')
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(32))
 
 # --- LOGIC CLASS (Unchanged) ---
 class NameMatcher:
