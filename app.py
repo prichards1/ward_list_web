@@ -123,6 +123,10 @@ def home():
 
     return render_template('index.html')
 
+@app.route('/instructions')
+def instructions():
+    return render_template('instructions.html')
+
 @app.route('/quiz', methods=['GET', 'POST'])
 def quiz():
     if 'families' not in session: return redirect(url_for('home'))
@@ -201,6 +205,11 @@ def quiz():
 def reset():
     session.clear()
     return redirect(url_for('home'))
+
+# Add this new route to app.py
+@app.route('/instructions')
+def instructions():
+    return render_template('instructions.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
