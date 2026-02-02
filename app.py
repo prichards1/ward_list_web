@@ -17,27 +17,87 @@ app.secret_key = os.environ.get('FLASK_SECRET_KEY') or secrets.token_hex(32)
 class NameMatcher:
     def __init__(self, correct_names):
         self.correct_names = correct_names
+        
+        # Build Phonetic Map (keep existing logic)
         self.phonetic_map = {}
         for name in correct_names:
-            code = jellyfish.metaphone(name)
-            if code not in self.phonetic_map:
-                self.phonetic_map[code] = []
-            self.phonetic_map[code].append(name)
+            # Note: metaphone can sometimes return empty strings for non-ascii, handle safely
+            try:
+                code = jellyfish.metaphone(name)
+                if code not in self.phonetic_map:
+                    self.phonetic_map[code] = []
+                self.phonetic_map[code].append(name)
+            except:
+                continue
 
+        # Expanded Nickname Database
         self.nickname_db = {
-            "dave": ["david"], "dan": ["daniel"], "danny": ["daniel"], "brad": ["bradley"],
-            "bob": ["robert"], "bobby": ["robert"], "rob": ["robert"],
-            "bill": ["william"], "will": ["william"], "billy": ["william"],
-            "peggy": ["margaret"], "maggie": ["margaret"], "maddy": ["madeline"],
-            "liz": ["elizabeth"], "beth": ["elizabeth", "bethany"], "lizzy": ["elizabeth"],
-            "chris": ["christopher", "christina", "christine"],
-            "mike": ["michael"], "mikey": ["michael"], "max": ["maxwell"],
-            "matt": ["matthew"], "debbie": ["debra"], "jake": ["jacob"],
-            "jen": ["jennifer"], "jenny": ["jennifer"],
-            "joe": ["joseph"], "joey": ["joseph"], "jim": ["james"],
-            "tom": ["thomas"], "tommy": ["thomas"],
-            "brooke": ["brooklyn"], "steph": ["stephanie"],
-            "zach": ["zachary"], "kim": ["kimberly"], "alex": ["alexander", "alexandra"]
+            # A
+            "abbie": ["abigail"], "abby": ["abigail"], "abe": ["abraham"], 
+            "alex": ["alexander", "alexandra"], "allie": ["allison", "alexandra"], 
+            "andy": ["andrew"], "art": ["arthur"], "ash": ["ashley"],
+            # B
+            "becky": ["rebecca"], "ben": ["benjamin"], "benny": ["benjamin"],
+            "bert": ["albert", "robert"], "beth": ["elizabeth", "bethany"],
+            "bill": ["william"], "billy": ["william"], "bob": ["robert"], 
+            "bobby": ["robert"], "brad": ["bradley"], "breck": ["brecken"],
+            "brooke": ["brooklyn"], "bud": ["buddy"],
+            # C
+            "cathy": ["catherine", "katherine"], "chris": ["christopher", "christina", "christine"],
+            "chuck": ["charles"], "cindy": ["cynthia"], "cliff": ["clifford"],
+            # D
+            "dan": ["daniel"], "danny": ["daniel"], "dave": ["david"], 
+            "debbie": ["debra", "deborah"], "deb": ["debra", "deborah"],
+            "dick": ["richard"], "don": ["donald"], "donny": ["donald"], "doug": ["douglas"],
+            # E
+            "ed": ["edward"], "eddie": ["edward"], "ellie": ["eleanor", "elizabeth"],
+            # F
+            "fred": ["frederick"], "freddy": ["frederick"], "frank": ["francis"],
+            # G
+            "greg": ["gregory"], "gabby": ["gabrielle", "gabriella"], "ginny": ["virginia"],
+            # H
+            "hank": ["henry"], "hal": ["harold"],
+            # J
+            "jake": ["jacob"], "jeff": ["jeffrey"], "jen": ["jennifer"], 
+            "jenny": ["jennifer"], "jerry": ["gerald", "jerome"], "jim": ["james"], 
+            "jimmy": ["james"], "joe": ["joseph"], "joey": ["joseph"], 
+            "jon": ["jonathan"], "josh": ["joshua"], "judy": ["judith"],
+            # K
+            "kate": ["katherine"], "kathy": ["katherine", "kathleen"], 
+            "katie": ["katherine"], "ken": ["kenneth"], "kenny": ["kenneth"], 
+            "kim": ["kimberly"], "kris": ["kristine", "kristen"],
+            # L
+            "larry": ["lawrence"], "leo": ["leonard"], "liz": ["elizabeth"], 
+            "lizzy": ["elizabeth"], "luke": ["lucas"],
+            # M
+            "maddy": ["madeline", "madison"], "maggie": ["margaret"], 
+            "mandy": ["amanda"], "marty": ["martin"], "matt": ["matthew"], 
+            "max": ["maxwell", "maximilian"], "meg": ["megan", "margaret"],
+            "mike": ["michael"], "mikey": ["michael"], "mindy": ["melinda"], 
+            "mitch": ["mitchell"],
+            # N
+            "nate": ["nathan", "nathaniel"], "nick": ["nicholas"],
+            # P
+            "pam": ["pamela"], "pat": ["patrick", "patricia"], 
+            "peggy": ["margaret"], "pete": ["peter"], "phil": ["philip"],
+            # R
+            "randy": ["randall"], "ray": ["raymond"], "rich": ["richard"], 
+            "rick": ["richard"], "rob": ["robert"], "ron": ["ronald"], 
+            "ronnie": ["ronald"], "russ": ["russell"],
+            # S
+            "sam": ["samuel", "samantha"], "sandy": ["sandra"], 
+            "steph": ["stephanie", "stephen"], "steve": ["steven", "stephen"], 
+            "sue": ["susan"], "suzie": ["susan"],
+            # T
+            "ted": ["theodore", "edward"], "teddy": ["theodore"], 
+            "terry": ["terrence", "teresa"], "tim": ["timothy"], 
+            "tom": ["thomas"], "tommy": ["thomas"], "tony": ["anthony"],
+            # V
+            "val": ["valerie"], "vicky": ["victoria"],
+            # W
+            "walt": ["walter"], "wes": ["wesley"], "will": ["william"],
+            # Z
+            "zach": ["zachary", "zachariah"], "zack": ["zachary"]
         }
 
     def find_match(self, user_guess):
@@ -45,27 +105,53 @@ class NameMatcher:
         guess_lower = guess_clean.lower()
         if not guess_clean: return None, None
 
-        # 1. Exact
+        # --- PRIORITY 1: Exact Match ---
+        # "Alex" matches "Alex"
         for name in self.correct_names:
             if name.lower() == guess_lower:
                 return name, "Exact Match"
 
-        # 2. Nickname
+        # --- PRIORITY 2: Split/Partial Match (New) ---
+        # "Alex" matches "Alex Koritz"
+        # "Ann" matches "Mary Ann"
+        for name in self.correct_names:
+            # Split "Alex Koritz" -> ["alex", "koritz"]
+            name_parts = name.lower().split()
+            if guess_lower in name_parts:
+                return name, "Partial Match"
+
+        # --- PRIORITY 3: Nickname Match ---
+        # 1. Look up "Bob" -> get ["Robert"]
+        # 2. Check if "Robert" is an exact match OR a partial match
         possible_formal_names = self.nickname_db.get(guess_lower, [])
+        
         for formal in possible_formal_names:
             for target_name in self.correct_names:
+                target_parts = target_name.lower().split()
+                
+                # Check A: Exact Nickname Match (e.g. Target="Robert", Guess="Bob")
                 if target_name.lower() == formal:
                     return target_name, "Nickname Match"
+                
+                # Check B: Partial Nickname Match (e.g. Target="Robert Smith", Guess="Bob")
+                if formal in target_parts:
+                    return target_name, "Nickname Match"
 
-        # 3. Phonetic
-        guess_phonetic = jellyfish.metaphone(guess_clean)
-        if guess_phonetic in self.phonetic_map:
-            return self.phonetic_map[guess_phonetic][0], "Phonetic Match"
+        # --- PRIORITY 4: Phonetic Match ---
+        # Uses metaphone to find sounds-alike
+        try:
+            guess_phonetic = jellyfish.metaphone(guess_clean)
+            if guess_phonetic in self.phonetic_map:
+                return self.phonetic_map[guess_phonetic][0], "Phonetic Match"
+        except:
+            pass # Skip phonetic if library fails on input
 
-        # 4. Fuzzy
+        # --- PRIORITY 5: Fuzzy Match ---
+        # Uses Levenshtein distance for typos (e.g. "Micheal" -> "Michael")
         best_match = process.extractOne(guess_clean, self.correct_names, scorer=fuzz.ratio)
         if best_match:
             name_found, score = best_match
+            # 80% is usually a safe threshold for names (allows 1-2 chars wrong)
             if score >= 80:
                 return name_found, f"Typo Fix ({score}%)"
 
