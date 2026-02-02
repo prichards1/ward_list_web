@@ -5,34 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ward List Quiz</title>
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
+    <style>
+      /* Optional tweak to align the Help box vertically with the form */
+      .help-box {
+        background-color: #f4f4f4; 
+        padding: 20px; 
+        border-radius: 8px;
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
     <main class="container">
-      <h1>Ward List Quiz</h1>
+      <hgroup>
+        <h1>Ward List Quiz</h1>
+        <h2>Learn names and faces efficiently</h2>
+      </hgroup>
       
       {% with messages = get_flashed_messages() %}
         {% if messages %}
           {% for message in messages %}
-            <article>{{ message }}</article>
+            <article style="background-color: #ffebee; border-color: #ef9a9a; color: #c62828;">
+              {{ message }}
+            </article>
           {% endfor %}
         {% endif %}
       {% endwith %}
 
       <div class="grid">
         <div>
-          <h3>Upload Family List</h3>
-          <p>Select your <code>.csv</code> file to begin.</p>
-          <form method=post enctype=multipart/form-data>
-            <input type=file name=file accept=".csv">
-            <button type=submit>Start Quiz</button>
+          <h3>Start a New Quiz</h3>
+          <p>Upload your processed ward list CSV to begin.</p>
+          <form method="post" enctype="multipart/form-data">
+            <label for="file">
+              Select CSV File
+              <input type="file" id="file" name="file" accept=".csv" required>
+            </label>
+            <button type="submit">Start Quiz</button>
           </form>
         </div>
-        <div>
-          <h3>Instructions</h3>
-          <ul>
-            <li>File must be a CSV.</li>
-            <li>Must contain columns: <strong>Last Name</strong>, <strong>First Name</strong>.</li>
-          </ul>
+
+        <div class="help-box">
+          <h3>Need Help?</h3>
+          <p>Not sure how to get the CSV file from the Church website?</p>
+          <a href="{{ url_for('instructions') }}" role="button" class="secondary outline">
+            View Step-by-Step Instructions
+          </a>
         </div>
       </div>
     </main>
