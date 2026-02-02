@@ -25,7 +25,7 @@ services:
       container_name: ward_list_nginx
       restart: unless-stopped
       ports:
-        - "${WARD_QUIZ_PORT:-8085}:80"
+        - "${WARD_QUIZ_PORT:-8625}:80"
       # REMOVE the 'volumes' section completely!
       # volumes:
       #   - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
