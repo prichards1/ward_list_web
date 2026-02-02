@@ -123,10 +123,6 @@ def home():
 
     return render_template('index.html')
 
-@app.route('/instructions')
-def instructions():
-    return render_template('instructions.html')
-
 @app.route('/quiz', methods=['GET', 'POST'])
 def quiz():
     if 'families' not in session: return redirect(url_for('home'))
