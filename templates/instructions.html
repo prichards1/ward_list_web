@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Instructions - Ward List Quiz</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h2 { color: #2980b9; margin-top: 30px; }
+        h3 { color: #16a085; margin-top: 20px; }
+        code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .alert { background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; border: 1px solid #ffeeba; margin-top: 30px; }
+        .btn { display: inline-block; margin-top: 20px; text-decoration: none; background: #2980b9; color: white; padding: 10px 20px; border-radius: 5px; }
+        .btn:hover { background: #3498db; }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="btn">← Back to Quiz</a>
+
+    <h1>How to Update the Ward List Data</h1>
+    <p>This guide explains how to download the current ward list from the Church website, clean it, and upload it here.</p>
+
+    <h2>Phase 1: Download Data from LCR</h2>
+    <ol>
+        <li>Log in to <a href="https://lcr.churchofjesuschrist.org/" target="_blank">LCR (Leader and Clerk Resources)</a>.</li>
+        <li>Go to <strong>Membership</strong> &rarr; <strong>Member List</strong>.</li>
+        <li>Click the <strong>Print/Export</strong> button (usually a printer icon).</li>
+        <li>Choose <strong>Export to CSV</strong>.<br>
+            <em>(Note: Do NOT choose PDF. We need the data file.)</em></li>
+        <li>Save the file to your computer. It is usually named <code>Member List.csv</code>.</li>
+    </ol>
+
+    <h2>Phase 2: Clean the File</h2>
+    <p>The raw file contains "junk" headers (like Ward Name and Date) that must be removed before uploading.</p>
+
+    <h3>Option A: Manual Cleaning (Excel/Numbers)</h3>
+    <ol>
+        <li>Open the CSV file in Excel or Numbers.</li>
+        <li>Highlight the top rows containing the Ward Name/Date.</li>
+        <li><strong>Delete these rows entirely.</strong></li>
+        <li>Ensure the <strong>very first row</strong> (Row 1) now contains the column headers (e.g., <code>Preferred Name</code>, <code>Household Position</code>).</li>
+        <li>Save/Export the file as <strong>CSV</strong>.</li>
+    </ol>
+
+    <h3>Option B: Using the Script (Admin)</h3>
+    <p>If you have the python helper script:</p>
+    <pre>python3 clean_ward_list.py "path/to/Member List.csv"</pre>
+
+    <h2>Phase 3: Upload to the Quiz</h2>
+    <ol>
+        <li>Go back to the <a href="/">Home Page</a>.</li>
+        <li>Click <strong>Choose File</strong>.</li>
+        <li>Select your <strong>cleaned</strong> CSV file.</li>
+        <li>Click <strong>Start Quiz</strong>.</li>
+    </ol>
+
+    <div class="alert">
+        <strong>⚠️ Security Note:</strong> This file contains real member contact information. 
+        Please <strong>delete the CSV files</strong> from your computer immediately after uploading.
+    </div>
+
+</body>
+</html>
