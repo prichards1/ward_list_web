@@ -10,7 +10,8 @@ from thefuzz import process, fuzz
 
 app = Flask(__name__)
 # Load from Environment variable, fallback to dev key if missing
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(32))
+# Falls back if the key is missing OR if it is empty
+app.secret_key = os.environ.get('FLASK_SECRET_KEY') or secrets.token_hex(32)
 
 # --- LOGIC CLASS (Unchanged) ---
 class NameMatcher:
